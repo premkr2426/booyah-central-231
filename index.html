@@ -1803,6 +1803,7 @@
       align-items: center;
       gap: 12px;
       padding: 12px 16px;
+      padding-top: 40px !important;
       background: rgba(10, 15, 29, 0.95);
       border-bottom: 2px solid rgba(245, 166, 35, 0.2);
       flex-shrink: 0;
@@ -2329,6 +2330,7 @@
       align-items: center;
       gap: 12px;
       padding: 12px 16px;
+      padding-top: 40px !important;
       background: rgba(10, 15, 29, 0.95);
       border-bottom: 2px solid rgba(245, 166, 35, 0.2);
       flex-shrink: 0;
@@ -6887,6 +6889,7 @@
           align-items: center;
           gap: 12px;
           padding: 12px 16px;
+          padding-top: 40px !important;
           background: rgba(10, 15, 29, 0.95);
           border-bottom: 2px solid rgba(245, 166, 35, 0.2);
           flex-shrink: 0;
@@ -7413,6 +7416,7 @@
           align-items: center;
           gap: 12px;
           padding: 12px 16px;
+          padding-top: 40px !important;
           background: rgba(10, 15, 29, 0.95);
           border-bottom: 2px solid rgba(245, 166, 35, 0.2);
           flex-shrink: 0;
@@ -10513,7 +10517,10 @@
     // ═══════════════════════════════════════
     // TABS
     // ═══════════════════════════════════════
-    function showTab(name) {
+    function showTab(name, isPop = false) {
+      if (!isPop) {
+        history.pushState({ tab: name }, '', '#' + name);
+      }
       if (name !== 'home') closeModeView(false);
       document.querySelectorAll('.tab-page').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -10618,12 +10625,13 @@
     }
     // Back button/gesture — layered close (popstate = browser/swipe back)
     let _handlingPop = false;
-    window.addEventListener('popstate', () => {
+    window.addEventListener('popstate', (e) => {
       if (_handlingPop) return;
       _handlingPop = true;
       setTimeout(() => { _handlingPop = false; }, 300);
       const cdv = document.getElementById('contestDetailView');
       const mtv = document.getElementById('modeTournamentsView');
+      const modals = document.querySelectorAll('.modal.show');
       if (cdv && cdv.classList.contains('open')) {
         cdv.classList.remove('open');
         if (cdTimeInterval) { clearInterval(cdTimeInterval); cdTimeInterval = null; }
@@ -10632,8 +10640,14 @@
       } else if (mtv && mtv.classList.contains('open')) {
         mtv.classList.remove('open');
         const hs = document.querySelector('.home-scroll'); if (hs) hs.scrollTop = 0;
+      } else if (modals.length > 0) {
+        modals.forEach(m => m.classList.remove('show'));
       } else {
-        document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+        let tab = 'home';
+        if (e && e.state && e.state.tab) tab = e.state.tab;
+        else if (window.location.hash) tab = window.location.hash.replace('#', '');
+        if (!['home', 'leaderboard', 'wallet', 'earn', 'menu'].includes(tab)) tab = 'home';
+        showTab(tab, true);
       }
     });
 
