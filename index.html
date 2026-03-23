@@ -96,6 +96,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 10px 16px;
+      padding-top: env(safe-area-inset-top, 40px);
       background: linear-gradient(180deg, #0d1422 0%, rgba(10, 15, 29, 0.97) 100%);
       flex-shrink: 0;
       position: relative;
@@ -12009,10 +12010,23 @@
       if (btnText) btnText.textContent = 'Loading...';
 
       try {
+        const payload = {
+          amount: Number(topupSelectedAmount),
+          ffUid: typeof user !== 'undefined' && user ? user.uid : "847593847",
+          name: "Booyah Player",
+          email: "player@booyahcentral.com",
+          phone: "9999999999",
+          customer_name: "Booyah Player",
+          customer_email: "player@booyahcentral.com",
+          customer_mobile: "9999999999",
+          client_txn_id: "TXN_" + Date.now(),
+          p_info: "Booyah Wallet Topup"
+        };
+
         const res = await fetch('https://booyah-backend.onrender.com/api/pay', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: Number(topupSelectedAmount), ffUid: user ? user.uid : "847593847" })
+          body: JSON.stringify(payload)
         });
 
         if (!res.ok) throw new Error('Payment API returned ' + res.status);
@@ -12020,15 +12034,14 @@
         const data = await res.json();
         console.log('TranzUPI Response:', data);
 
-        // Extract QR from TranzUPI response format
-        const qrUrl = data?.data?.qrUrl || data?.qrData || data?.data?.payload?.qr_link || data?.qr;
+        const qrUrl = data?.data?.qrUrl || data?.qrData || data?.data?.payload?.qr_link || data?.qr || data?.data?.payment_url;
+        
         if (!qrUrl) {
           throw new Error('QR URL not found in API response');
         }
 
         document.getElementById('topupPayAmt').textContent = topupSelectedAmount;
 
-        // Display QR image and hide placeholder
         const qrImg = document.getElementById('dynamicQrImage');
         const qrPlaceholder = document.getElementById('qrPlaceholderContent');
         if (qrImg && qrPlaceholder) {
@@ -12036,7 +12049,6 @@
           qrImg.style.display = 'block';
           qrPlaceholder.style.display = 'none';
 
-          // Stop continuous pulsing animation around QR when it loads successfully
           const qrBox = document.getElementById('topupQrBox');
           if (qrBox) qrBox.style.animation = 'none';
         }
@@ -12059,10 +12071,10 @@
           });
         }, 250);
 
-      } catch (err) {
-        console.error('Payment Error:', err);
-        if (typeof toast === 'function') toast('Error initializing payment: ' + err.message, 'error');
-        else alert('Error initializing payment: ' + err.message);
+      } catch (error) {
+        console.error("Payment Error:", error);
+        if (typeof toast === 'function') toast(error.message, 'error');
+        else alert("Error: " + error.message);
       } finally {
         btn.disabled = false;
         if (btnText) btnText.textContent = origText;
