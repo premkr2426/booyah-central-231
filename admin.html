@@ -4240,22 +4240,17 @@ Respond in this EXACT JSON format only, no other text:
 
       if (!confirm('Are you sure you want to send this push notification to all users?')) return;
 
-      const REST_API_KEY = "os_v2_app_fk6uq6z435eineyytexzqvmtwv22lrtejjtuos5d7fs3gart5h3zwrrv3vpcfm5m3x44wljiwgwzzghpvuknasla6qpitlxyi2ixaoq";
-      
       const payload = {
-        app_id: "2abd487b-3cdf-4886-9318-992f985593b5",
-        included_segments: ["Subscribed Users"],
-        headings: { "en": title },
-        contents: { "en": message }
+        title: title,
+        message: message
       };
 
       try {
         if(typeof loader === "function") loader(true);
-        const res = await fetch("https://onesignal.com/api/v1/notifications", {
+        const res = await fetch("/api/send", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Basic " + REST_API_KEY
+            "Content-Type": "application/json"
           },
           body: JSON.stringify(payload)
         });
@@ -4263,19 +4258,16 @@ Respond in this EXACT JSON format only, no other text:
         const data = await res.json();
         if(typeof loader === "function") loader(false);
 
-        if (data.id) {
-          if(typeof toast === "function") toast('Push notification sent successfully!', 'success');
-          else alert('Push notification sent successfully!');
+        if (res.ok) {
+          alert("BOOYAH! 🚀 Notification sent!");
           document.getElementById('notiTitle').value = '';
           document.getElementById('notiMessage').value = '';
         } else {
-          if(typeof toast === "function") toast('Failed to send notification: ' + (data.errors ? data.errors[0] : 'Unknown Error'), 'error');
-          else alert('Failed to send notification: ' + (data.errors ? data.errors[0] : 'Unknown Error'));
+          alert("Failed to send notification: " + (data.error || 'Unknown Error'));
         }
       } catch (e) {
         if(typeof loader === "function") loader(false);
-        if(typeof toast === "function") toast('Error sending notification: ' + e.message, 'error');
-        else alert('Error sending notification: ' + e.message);
+        alert("Error sending notification: " + e.message);
       }
     }
 
