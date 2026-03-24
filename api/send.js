@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Title and message are required' });
   }
 
-  const REST_API_KEY = "22lrtejjtuos5d7fs3gart5h3";
+  const REST_API_KEY = "os_v2_app_fk6uq6z435eineyytexzqvmtwwqnkp72wmvuafe6zegwoqvbxxqtchru7ktzjaqo7t2fzkjw4bqmqwmr7c2rfqenj5pqeq6p6yru7oi";
   const APP_ID = "2abd487b-3cdf-4886-9318-992f985593b5";
 
   const payload = {
@@ -35,9 +35,10 @@ export default async function handler(req, res) {
     if (response.ok && data.id) {
       return res.status(200).json({ success: true, data });
     } else {
-      return res.status(500).json({ error: data.errors ? data.errors[0] : 'Failed to send notification', details: data });
+      return res.status(500).json({ errors: data.errors, details: data });
     }
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error', message: error.message });
   }
 }
+

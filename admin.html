@@ -4263,7 +4263,7 @@ Respond in this EXACT JSON format only, no other text:
           document.getElementById('notiTitle').value = '';
           document.getElementById('notiMessage').value = '';
         } else {
-          alert("Failed to send notification: " + (data.error || 'Unknown Error'));
+          alert("Error: " + JSON.stringify(data.errors));
         }
       } catch (e) {
         if(typeof loader === "function") loader(false);
