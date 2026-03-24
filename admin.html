@@ -2470,6 +2470,23 @@
             <div class="skel" style="height:150px"></div>
           </div>
         </div>
+
+        <div class="card border-danger bg-danger">
+          <div class="card-title" style="color: var(--red);"><i class="fas fa-bell"></i> Push Notification (OneSignal)</div>
+          <div class="form-grid" style="margin-bottom:12px">
+            <div class="inp-group form-full">
+              <label style="color: var(--red)"><i class="fas fa-heading"></i> Notification Title</label>
+              <input type="text" id="notiTitle" placeholder="Enter Notification Title...">
+            </div>
+            <div class="inp-group form-full">
+              <label style="color: var(--red)"><i class="fas fa-envelope"></i> Message / Room Details</label>
+              <textarea id="notiMessage" placeholder="Enter Message / Room Details..." rows="3"></textarea>
+            </div>
+          </div>
+          <button type="button" class="btn red full" onclick="sendPushNotification()">
+            <i class="fas fa-paper-plane"></i> SEND PUSH NOTIFICATION
+          </button>
+        </div>
       </div>
 
       <!-- HOME PAGE DESIGNER / APP SETTINGS -->
@@ -4207,6 +4224,59 @@ Respond in this EXACT JSON format only, no other text:
           badge.style.display = count > 0 ? 'inline-flex' : 'none';
         }
       });
+    }
+
+    // ═══════════════════════════════════════
+    // PUSH NOTIFICATIONS (ONESIGNAL)
+    // ═══════════════════════════════════════
+    async function sendPushNotification() {
+      const title = document.getElementById('notiTitle').value.trim();
+      const message = document.getElementById('notiMessage').value.trim();
+      
+      if (!title || !message) {
+        if(typeof toast === "function") return toast('Please enter both title and message!', 'error');
+        return alert('Please enter both title and message!');
+      }
+
+      if (!confirm('Are you sure you want to send this push notification to all users?')) return;
+
+      const REST_API_KEY = "os_v2_app_fk6uq6z435eineyytexzqvmtwv22lrtejjtuos5d7fs3gart5h3zwrrv3vpcfm5m3x44wljiwgwzzghpvuknasla6qpitlxyi2ixaoq";
+      
+      const payload = {
+        app_id: "2abd487b-3cdf-4886-9318-992f985593b5",
+        included_segments: ["Subscribed Users"],
+        headings: { "en": title },
+        contents: { "en": message }
+      };
+
+      try {
+        if(typeof loader === "function") loader(true);
+        const res = await fetch("https://onesignal.com/api/v1/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Basic " + REST_API_KEY
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if(typeof loader === "function") loader(false);
+
+        if (data.id) {
+          if(typeof toast === "function") toast('Push notification sent successfully!', 'success');
+          else alert('Push notification sent successfully!');
+          document.getElementById('notiTitle').value = '';
+          document.getElementById('notiMessage').value = '';
+        } else {
+          if(typeof toast === "function") toast('Failed to send notification: ' + (data.errors ? data.errors[0] : 'Unknown Error'), 'error');
+          else alert('Failed to send notification: ' + (data.errors ? data.errors[0] : 'Unknown Error'));
+        }
+      } catch (e) {
+        if(typeof loader === "function") loader(false);
+        if(typeof toast === "function") toast('Error sending notification: ' + e.message, 'error');
+        else alert('Error sending notification: ' + e.message);
+      }
     }
 
   </script>
