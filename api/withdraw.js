@@ -55,14 +55,15 @@ export default async function handler(req, res) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const currentCoins = userData.coins || 0;
+        // COINS KI JAGAH BALANCE KAR DIYA
+        const currentBalance = userData.balance || 0; 
         
         // 2. Validate sufficient balance
-        if (currentCoins < amount) {
+        if (currentBalance < amount) {
             return res.status(400).json({ error: 'Insufficient balance' });
         }
 
-        const remainingCoins = currentCoins - amount;
+        const remainingBalance = currentBalance - amount;
 
         // 3. Prepare the new transaction record
         // This makes sure it shows as an absolute deduction in history
@@ -75,7 +76,8 @@ export default async function handler(req, res) {
 
         // 4. Update the balance and push transaction atomically using updates
         const updates = {};
-        updates[`users/${ffUid}/coins`] = remainingCoins;
+        // DATABASE MEIN BHI BALANCE UPDATE HOGA
+        updates[`users/${ffUid}/balance`] = remainingBalance; 
         
         await db.ref().update(updates);
         
@@ -95,7 +97,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ 
             success: true, 
             message: 'Withdrawal successful', 
-            remainingCoins: remainingCoins 
+            remainingBalance: remainingBalance 
         });
 
     } catch (error) {
