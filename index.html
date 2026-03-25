@@ -10795,7 +10795,7 @@
         var uid = 'U' + Date.now(), code = genCode(), now = Date.now();
         var startBal = 0, startTxns = {}, referredBy = null;
         function finishSignup() {
-          var data = { name: name, mobile: mobile, password: pass, referralCode: code, balance: startBal, coins: 0, wins: 0, matches: 0, kills: 0, totalEarned: startBal, upi: '', joinedTournaments: {}, createdAt: now };
+          var data = { name: name, mobile: mobile, password: pass, referralCode: code, balance: startBal,  wins: 0, matches: 0, kills: 0, totalEarned: startBal, upi: '', joinedTournaments: {}, createdAt: now };
           if (referredBy) data.referredBy = referredBy;
           if (Object.keys(startTxns).length) data.transactions = startTxns;
           db.ref('users/' + uid).set(data).then(function () {
@@ -10851,7 +10851,7 @@
         if (snap.exists()) {
           var v = snap.val(); v.uid = user.uid;
           user = v;
-          if (window.realUserCoins !== undefined) user.coins = window.realUserCoins;
+          if (window.realUserBalance !== undefined) user.balance = window.realUserBalance;
           lsSet('bc_user', JSON.stringify(user));
           updateHeaderUI();
         }
@@ -10866,12 +10866,12 @@
 
         if (res.ok) {
           const data = await res.json();
-          window.realUserCoins = data.coins || 0;
-          if (user) user.coins = window.realUserCoins;
+          window.realUserBalance = data.balance || 0;
+          if (user) user.balance = window.realUserBalance;
           updateHeaderUI();
           var walletTotalDisplay = document.getElementById('walletTotalDisplay');
           if (walletTotalDisplay && user) {
-            var tb = window.realUserCoins || 0;
+            var tb = window.realUserBalance || 0;
             walletTotalDisplay.textContent = '₹' + tb;
           }
         }
@@ -10893,8 +10893,8 @@
       document.getElementById('hdrName').textContent = user.name || 'Player';
       document.getElementById('hdrAvatar').textContent = (user.name || 'P')[0].toUpperCase();
       document.getElementById('hdrLevel').textContent = 'LVL ' + level;
-      var winCoins = window.realUserCoins !== undefined ? window.realUserCoins : (user.coins || 0);
-      var totalBalance = winCoins;
+      var winBalance = window.realUserBalance !== undefined ? window.realUserBalance : (user.balance || 0);
+      var totalBalance = winBalance;
       if (document.getElementById('hdrTotalBalance')) document.getElementById('hdrTotalBalance').textContent = totalBalance;
     }
     function loadSettings() {
@@ -11374,8 +11374,8 @@
       } else {
         if (status === 'ended') return toast('Tournament ended', 'error');
         const fee = t.entryFee || 0;
-        const winCoins = window.realUserCoins !== undefined ? window.realUserCoins : (user.coins || 0);
-        const totalBalance = winCoins;
+        const winBalance = window.realUserBalance !== undefined ? window.realUserBalance : (user.balance || 0);
+        const totalBalance = winBalance;
         const isFull = (t.filledSlots || 0) >= (t.totalSlots || 100);
         const freeMatch = fee === 0;
         const canAfford = freeMatch || totalBalance >= fee;
@@ -11437,8 +11437,8 @@
       if (!ingameName) return toast('In-Game Name daalo!', 'error');
       if (!gameUID || gameUID.length < 6) return toast('Sahi Free Fire UID daalo!', 'error');
       // Unified balance check
-      var winCoins = window.realUserCoins !== undefined ? window.realUserCoins : (user.coins || 0);
-      var totalBalance = winCoins;
+      var winBalance = window.realUserBalance !== undefined ? window.realUserBalance : (user.balance || 0);
+      var totalBalance = winBalance;
       if (fee > 0 && totalBalance < fee) return toast('Insufficient balance! ₹' + fee + ' required', 'error');
       loader(true);
       var now = Date.now();
@@ -11447,7 +11447,7 @@
       updates['users/' + user.uid + '/gameUID'] = gameUID;
       // Deduct fee explicitly from coins
       if (fee > 0) {
-        updates['users/' + user.uid + '/coins'] = (user.coins || 0) - fee;
+        updates['users/' + user.uid + '/balance'] = (user.balance || 0) - fee;
         updates['users/' + user.uid + '/transactions/T' + now] = { type: 'debit', amount: fee, desc: 'Joined ' + t.name + ' (₹' + fee + ')', date: now };
       }
       updates['users/' + user.uid + '/matches'] = (user.matches || 0) + 1;
@@ -11524,8 +11524,8 @@
     // ═══════════════════════════════════════
     function loadWallet() {
       refreshUser().then(function () {
-        var winCoins = (window.realUserCoins !== undefined ? window.realUserCoins : (user && user.coins) || 0);
-        var total = winCoins;
+        var winBalance = (window.realUserBalance !== undefined ? window.realUserBalance : (user && user.balance) || 0);
+        var total = winBalance;
         if (document.getElementById('walletTotalDisplay')) document.getElementById('walletTotalDisplay').textContent = '₹' + total;
         var txnList = document.getElementById('txnList');
         txnList.innerHTML = '<div class="skel" style="height:58px;margin-bottom:8px;border-radius:12px"></div>'.repeat(4);
@@ -11560,9 +11560,9 @@
       if (!upi) return toast('Enter UPI ID', 'error');
 
       // Check balance for withdrawal
-      var winCoins = window.realUserCoins !== undefined ? window.realUserCoins : (user?.coins || 0);
-      if (winCoins < amt) {
-        alert("Insufficient balance! You only have ₹" + winCoins + " available for withdrawal.");
+      var winBalance = window.realUserBalance !== undefined ? window.realUserBalance : (user?.balance || 0);
+      if (winBalance < amt) {
+        alert("Insufficient balance! You only have ₹" + winBalance + " available for withdrawal.");
         return;
       }
 
@@ -11580,14 +11580,14 @@
         }
 
         // Update WINNINGS balance only
-        if (data.remainingCoins !== undefined) {
-          window.realUserCoins = data.remainingCoins;
-          if (user) user.coins = data.remainingCoins;
+        if (data.remainingBalance !== undefined) {
+          window.realUserBalance = data.remainingBalance;
+          if (user) user.balance = data.remainingBalance;
 
           updateHeaderUI();
-          if (document.getElementById('walletCoins')) document.getElementById('walletCoins').textContent = window.realUserCoins;
+          if (document.getElementById('walletCoins')) document.getElementById('walletCoins').textContent = window.realUserBalance;
           var walletTotalDisplay = document.getElementById('walletTotalDisplay');
-          if (walletTotalDisplay && user) walletTotalDisplay.textContent = window.realUserCoins;
+          if (walletTotalDisplay && user) walletTotalDisplay.textContent = window.realUserBalance;
         }
 
         closeModal('withdrawModal');
@@ -11605,7 +11605,7 @@
     // ═══════════════════════════════════════
     function loadEarnPage() {
       if (!user) return;
-      document.getElementById('earnCoins').textContent = user.coins || 0;
+      document.getElementById('earnBalance').textContent = user.balance || 0;
       const key = 'ads_' + new Date().toDateString();
       adsToday = parseInt(lsGet(key) || '0');
       document.getElementById('todayAds').textContent = adsToday + '/' + MAX_ADS;
@@ -11648,10 +11648,10 @@
     }
     function awardCoins(amt) {
       if (!db || !user) return;
-      var newCoins = (user.coins || 0) + amt;
-      db.ref('users/' + user.uid + '/coins').set(newCoins).then(function () {
-        user.coins = newCoins; lsSet('bc_user', JSON.stringify(user));
-        if (document.getElementById('earnCoins')) document.getElementById('earnCoins').textContent = newCoins;
+      var newBalance = (user.balance || 0) + amt;
+      db.ref('users/' + user.uid + '/balance').set(newBalance).then(function () {
+        user.balance = newBalance; lsSet('bc_user', JSON.stringify(user));
+        if (document.getElementById('earnBalance')) document.getElementById('earnBalance').textContent = newBalance;
         updateHeaderUI();
         document.getElementById('todayAds').textContent = adsToday + '/' + MAX_ADS;
         document.getElementById('watchBtn').disabled = adsToday >= MAX_ADS;
@@ -11851,7 +11851,7 @@
     function initTaskSystem() {
       if (!user) return;
       // Update coin display
-      if (document.getElementById('taskEarnCoins')) document.getElementById('taskEarnCoins').textContent = user.coins || 0;
+      if (document.getElementById('taskEarnCoins')) document.getElementById('taskEarnCoins').textContent = user.balance || 0;
 
       // Load user completed tasks
       userCompletedTasks = user.completedTasks || {};
@@ -11954,7 +11954,7 @@
       // Award coins
       var now = Date.now();
       var updates = {};
-      updates['users/' + user.uid + '/coins'] = (user.coins || 0) + task.reward;
+      updates['users/' + user.uid + '/balance'] = (user.balance || 0) + task.reward;
       updates['users/' + user.uid + '/completedTasks/' + taskId] = now;
       updates['users/' + user.uid + '/transactions/T' + now] = {
         type: 'credit',
@@ -11970,8 +11970,8 @@
         lsSet('bc_user', JSON.stringify(user));
         userCompletedTasks = user.completedTasks || {};
         // Update displays
-        if (document.getElementById('taskEarnCoins')) document.getElementById('taskEarnCoins').textContent = user.coins || 0;
-        if (document.getElementById('earnCoins')) document.getElementById('earnCoins').textContent = user.coins || 0;
+        if (document.getElementById('taskEarnCoins')) document.getElementById('taskEarnCoins').textContent = user.balance || 0;
+        if (document.getElementById('earnBalance')) document.getElementById('earnBalance').textContent = user.balance || 0;
         updateHeaderUI();
         // Mark card done
         var card = document.getElementById('taskCard_' + taskId);

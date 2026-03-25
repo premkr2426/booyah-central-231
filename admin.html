@@ -2836,11 +2836,11 @@
       const pendingAmt = pending.reduce((a, w) => a + (w.amount || 0), 0);
       const banned = players.filter(p => p.banned).length;
       const activeTours = Object.values(allTournaments).filter(t => { const s = getTStatus(t); return s === 'live' || s === 'soon'; }).length;
-      const totalPlayCoins = players.reduce((a, p) => a + (p.coins || 0), 0);
+      const totalPlayBalance = players.reduce((a, p) => a + (p.balance || 0), 0);
       const totalMatches = players.reduce((a, p) => a + (p.matches || 0), 0);
       document.getElementById('dTotalPlayers').textContent = players.length;
       document.getElementById('dActiveTournaments').textContent = activeTours;
-      document.getElementById('dTotalDeposits').textContent = '₹' + totalPlayCoins;
+      document.getElementById('dTotalDeposits').textContent = '₹' + totalPlayBalance;
       document.getElementById('dPendingWithdrawals').textContent = pending.length;
       document.getElementById('dPendingAmt').textContent = pending.length ? '₹' + pendingAmt + ' pending' : '';
       document.getElementById('dTotalMatches').textContent = totalMatches;
@@ -2878,17 +2878,17 @@
         const players = Object.values(usersSnap.val() || {});
         const tours = Object.values(tourSnap.val() || {});
         const withdrawals = Object.values(wSnap.val() || {});
-        const totalCoinsGiven = players.reduce((a, p) => a + (p.coins || 0), 0);
+        const totalBalanceGiven = players.reduce((a, p) => a + (p.balance || 0), 0);
         const approvedWithdrawals = withdrawals.filter(w => w.status === 'approved');
         const paidOut = approvedWithdrawals.reduce((a, w) => a + (w.amount || 0), 0);
         document.getElementById('rTournaments').textContent = tours.length;
         document.getElementById('rPlayers').textContent = players.length;
-        document.getElementById('rCoins').textContent = totalCoinsGiven;
+        document.getElementById('rCoins').textContent = totalBalanceGiven;
         document.getElementById('rWithdrawals').textContent = '₹' + paidOut;
         const maxT = Math.max(tours.length, 1);
         document.getElementById('rTBarFill').style.width = Math.min(100, tours.length / maxT * 100) + '%';
         document.getElementById('rPBarFill').style.width = Math.min(100, players.length / Math.max(players.length, 1) * 100) + '%';
-        document.getElementById('rCBarFill').style.width = Math.min(100, totalCoinsGiven / Math.max(totalCoinsGiven, 1) * 100) + '%';
+        document.getElementById('rCBarFill').style.width = Math.min(100, totalBalanceGiven / Math.max(totalBalanceGiven, 1) * 100) + '%';
         document.getElementById('rWBarFill').style.width = Math.min(100, paidOut / Math.max(paidOut, 1) * 100) + '%';
         // Tournament earnings table
         const sortedTours = Object.entries(tourSnap.val() || {}).map(([id, t]) => ({ ...t, id })).sort((a, b) => (b.filledSlots || 0) * (b.entryFee || 0) - (a.filledSlots || 0) * (a.entryFee || 0));
@@ -3086,7 +3086,7 @@
             if (totalPrize > 0) {
               const playerSnap = await db.ref('users/' + r.uid).once('value');
               const player = playerSnap.val() || {};
-              updates['users/' + r.uid + '/coins'] = (player.coins || 0) + totalPrize;
+              updates['users/' + r.uid + '/balance'] = (player.balance || 0) + totalPrize;
               updates['users/' + r.uid + '/wins'] = (player.wins || 0) + (r.rank === 1 ? 1 : 0);
               updates['users/' + r.uid + '/kills'] = (player.kills || 0) + r.kills;
               updates['users/' + r.uid + '/totalEarned'] = (player.totalEarned || 0) + totalPrize;
@@ -3118,12 +3118,12 @@
       entries.sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
       const el = document.getElementById('playersTable');
       if (!entries.length) { el.innerHTML = empty('fa-users', 'No players found'); return; }
-      el.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>Player</th><th>Mobile</th><th>₹ Balance</th><th>Matches</th><th>Status</th><th>Actions</th></tr></thead><tbody>${entries.map(([uid, p]) => { const totalBal = (p.coins || 0); return `<tr><td><span class="td-avatar">${(p.name || '?')[0].toUpperCase()}</span><span class="td-name">${p.name || 'Unknown'}</span></td><td><span class="td-mono">${p.mobile || '—'}</span></td><td><span class="td-coin" style="color:var(--accent)">₹${totalBal}</span></td><td style="font-size:0.8rem">${p.matches || 0}</td><td><span class="badge ${p.banned ? 'banned' : 'active'}">${p.banned ? 'BANNED' : 'ACTIVE'}</span></td><td><div class="action-btns"><button type="button" class="btn-act view" onclick="viewPlayer('${uid}')"><i class="fas fa-eye"></i></button><button type="button" class="btn-act coin" onclick="showPage('givecoins');prefillGcPlayer('${uid}','${(p.name || '').replace(/'/g, '&apos;')}')"><i class="fas fa-rupee-sign"></i></button><button type="button" class="btn-act ${p.banned ? 'unban' : 'ban'}" onclick="${p.banned ? 'unbanPlayer' : 'banPlayer'}('${uid}','${(p.name || '').replace(/'/g, '&apos;')}')">${p.banned ? '<i class="fas fa-unlock"></i> Unban' : '<i class="fas fa-ban"></i> Ban'}</button></div></td></tr>`; }).join('')}</tbody></table></div>`;
+      el.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>Player</th><th>Mobile</th><th>₹ Balance</th><th>Matches</th><th>Status</th><th>Actions</th></tr></thead><tbody>${entries.map(([uid, p]) => { const totalBal = (p.balance || 0); return `<tr><td><span class="td-avatar">${(p.name || '?')[0].toUpperCase()}</span><span class="td-name">${p.name || 'Unknown'}</span></td><td><span class="td-mono">${p.mobile || '—'}</span></td><td><span class="td-coin" style="color:var(--accent)">₹${totalBal}</span></td><td style="font-size:0.8rem">${p.matches || 0}</td><td><span class="badge ${p.banned ? 'banned' : 'active'}">${p.banned ? 'BANNED' : 'ACTIVE'}</span></td><td><div class="action-btns"><button type="button" class="btn-act view" onclick="viewPlayer('${uid}')"><i class="fas fa-eye"></i></button><button type="button" class="btn-act coin" onclick="showPage('givecoins');prefillGcPlayer('${uid}','${(p.name || '').replace(/'/g, '&apos;')}')"><i class="fas fa-rupee-sign"></i></button><button type="button" class="btn-act ${p.banned ? 'unban' : 'ban'}" onclick="${p.banned ? 'unbanPlayer' : 'banPlayer'}('${uid}','${(p.name || '').replace(/'/g, '&apos;')}')">${p.banned ? '<i class="fas fa-unlock"></i> Unban' : '<i class="fas fa-ban"></i> Ban'}</button></div></td></tr>`; }).join('')}</tbody></table></div>`;
     }
     function viewPlayer(uid) {
       const p = allPlayers[uid]; if (!p) return;
       const level = calcLevel(p.matches || 0);
-      const totalBal = (p.coins || 0);
+      const totalBal = (p.balance || 0);
       document.getElementById('playerModalBody').innerHTML = `
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding:14px;background:var(--bg4);border-radius:var(--rs)">
       <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:#fff;flex-shrink:0">${(p.name || '?')[0].toUpperCase()}</div>
@@ -3161,7 +3161,7 @@
       const matches = Object.entries(allPlayers).filter(([, p]) => (p.mobile || '').includes(q) || (p.name || '').toLowerCase().includes(q)).slice(0, 8);
       if (!matches.length) { res.style.display = 'block'; res.innerHTML = '<div style="padding:12px;font-size:0.78rem;color:var(--dim);text-align:center">No players found</div>'; return; }
       res.style.display = 'block';
-      res.innerHTML = matches.map(([uid, p]) => { const totalBal = (p.coins || 0); return `<div onclick="selectGcPlayer('${uid}','${(p.name || '?').replace(/'/g, '&apos;')}')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.15s" onmouseover="this.style.background='var(--bg5)'" onmouseout="this.style.background=''">
+      res.innerHTML = matches.map(([uid, p]) => { const totalBal = (p.balance || 0); return `<div onclick="selectGcPlayer('${uid}','${(p.name || '?').replace(/'/g, '&apos;')}')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.15s" onmouseover="this.style.background='var(--bg5)'" onmouseout="this.style.background=''">
     <div style="width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:800;color:#fff;flex-shrink:0">${(p.name || '?')[0].toUpperCase()}</div>
     <div><div style="font-size:0.8rem;font-weight:700;color:var(--text)">${p.name || 'Unknown'}</div><div style="font-size:0.65rem;color:var(--dim)">📱 ${p.mobile || '—'} &nbsp;|&nbsp; ₹${totalBal}</div></div>
   </div>`; }).join('');
@@ -3199,7 +3199,7 @@
           const current = snap.val() || {};
           const newBal = (current['coins'] || 0) + amt;
           
-          await db.ref('users/' + gcSelectedUid + '/coins').set(newBal);
+          await db.ref('users/' + gcSelectedUid + '/balance').set(newBal);
           await db.ref('users/' + gcSelectedUid + '/transactions/T' + now).set({ type: 'credit', amount: amt, desc: `Admin Gift: ${reason}`, date: now });
           await db.ref('adminCoinGifts/G' + now).set({ uid: gcSelectedUid, name: player.name, coinType: 'rupee', amount: amt, reason, date: now, adminName: currentAdmin?.name || 'Admin' });
           
@@ -3595,12 +3595,12 @@
             <div style="font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;color:#22c55e;">₹${r.amount}</div>
           </div>
           <div style="background:rgba(79,110,247,0.06);border:1px solid rgba(79,110,247,0.15);border-radius:10px;padding:10px;margin-bottom:12px;font-size:0.75rem;">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:#64748b;">Coins:</span><span style="color:#4f6ef7;font-weight:700;">${r.coins} 💎 Play Coins</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:#64748b;">Coins:</span><span style="color:#4f6ef7;font-weight:700;">${r.balance} 💎 Play Coins</span></div>
             <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:#64748b;">UTR:</span><span style="color:#e2e8f0;font-weight:700;font-family:monospace;">${r.utr}</span></div>
             <div style="display:flex;justify-content:space-between;"><span style="color:#64748b;">Time:</span><span style="color:#e2e8f0;">${new Date(r.createdAt).toLocaleString('en-IN')}</span></div>
           </div>
           <div style="display:flex;gap:8px;">
-            <button onclick="approvePayment('${key}','${r.uid}',${r.amount},${r.coins},'${r.name}')" 
+            <button onclick="approvePayment('${key}','${r.uid}',${r.amount},${r.balance},'${r.name}')" 
               style="flex:1;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:10px;padding:12px;color:#fff;font-weight:800;font-size:0.8rem;cursor:pointer;">
               ✅ APPROVE
             </button>
@@ -3625,7 +3625,7 @@
       if (!confirm('Approve ₹' + amount + ' payment for ' + name + '?')) return;
       showLoader();
       // Add coins to user
-      db.ref('users/' + uid + '/coins').transaction(function (c) { return (c || 0) + coins; }).then(function () {
+      db.ref('users/' + uid + '/balance').transaction(function (c) { return (c || 0) + coins; }).then(function () {
         return db.ref('users/' + uid + '/transactions/T' + Date.now()).set({
           type: 'credit', amount: coins, desc: 'Add Money ₹' + amount + ' Approved', date: Date.now()
         });
