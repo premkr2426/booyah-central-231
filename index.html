@@ -10795,7 +10795,7 @@
         var uid = 'U' + Date.now(), code = genCode(), now = Date.now();
         var startBal = 0, startTxns = {}, referredBy = null;
         function finishSignup() {
-          var data = { name: name, mobile: mobile, password: pass, referralCode: code, balance: startBal,  wins: 0, matches: 0, kills: 0, totalEarned: startBal, upi: '', joinedTournaments: {}, createdAt: now };
+          var data = { name: name, mobile: mobile, password: pass, referralCode: code, balance: startBal, wins: 0, matches: 0, kills: 0, totalEarned: startBal, upi: '', joinedTournaments: {}, createdAt: now };
           if (referredBy) data.referredBy = referredBy;
           if (Object.keys(startTxns).length) data.transactions = startTxns;
           db.ref('users/' + uid).set(data).then(function () {
@@ -11543,7 +11543,7 @@
             var colorClass = isAdd ? 'credit' : isExchange ? 'exchange' : 'debit';
             var sign = isAdd ? '+' : isExchange ? '~' : '-';
             var absAmount = Math.abs(t.amount || 0);
-            
+
             var title = t.desc || 'Transaction';
             if (t.type === 'withdrawal') title = 'Withdrawal';
 
@@ -12048,7 +12048,6 @@
           client_txn_id: "TXN_" + Date.now(),
           p_info: "Booyah Wallet Topup"
         };
-
         const res = await fetch('https://booyah-backend.onrender.com/api/pay', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -12060,9 +12059,10 @@
         const data = await res.json();
         console.log('TranzUPI Response:', data);
 
-        const qrUrl = data?.data?.qrUrl || data?.qrData || data?.data?.payload?.qr_link || data?.qr || data?.data?.payment_url;
+        // 🚨 THE FIX: TranzUPI ka exact variable pakad liya!
+        const paymentLink = data?.result?.payment_url || data?.payment_url;
 
-        if (!qrUrl) {
+        if (!paymentLink) {
           throw new Error('QR URL not found in API response');
         }
 
@@ -12071,7 +12071,9 @@
         const qrImg = document.getElementById('dynamicQrImage');
         const qrPlaceholder = document.getElementById('qrPlaceholderContent');
         if (qrImg && qrPlaceholder) {
-          qrImg.src = qrUrl;
+          // 🚀 NINJA HACK: TranzUPI web link deta hai, photo nahi. 
+          // Isliye hum free API use karke us link ko Live QR Code Image bana rahe hain!
+          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(paymentLink)}`;
           qrImg.style.display = 'block';
           qrPlaceholder.style.display = 'none';
 
