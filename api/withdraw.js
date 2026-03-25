@@ -76,8 +76,12 @@ export default async function handler(req, res) {
 
         // 4. Update the balance and push transaction atomically using updates
         const updates = {};
-        // DATABASE MEIN BHI BALANCE UPDATE HOGA
+        
+        // DATABASE MEIN BALANCE UPDATE HOGA
         updates[`users/${ffUid}/balance`] = remainingBalance; 
+        
+        // 🔥 AUTOMATIC KACHRA SAAF: Yeh line 'coins' ko hamesha ke liye delete kar degi
+        updates[`users/${ffUid}/coins`] = null; 
         
         await db.ref().update(updates);
         
