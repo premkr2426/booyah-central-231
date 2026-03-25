@@ -11481,7 +11481,7 @@
       var list = document.getElementById('lbList');
       list.innerHTML = '<div class="skel" style="height:70px;margin:0 14px 8px;border-radius:14px"></div>'.repeat(6);
       if (!db) return;
-      var field = lbPeriod === 'kills' ? 'kills' : lbPeriod === 'wins' ? 'wins' : 'totalEarned';
+      var field = lbPeriod === 'kills' ? 'kills' : lbPeriod === 'wins' ? 'wins' : 'balance';
       db.ref('users').once('value').then(function (snap) {
         var players = []; snap.forEach(function (c) { var v = c.val(); if (v.name) { v.uid = c.key; players.push(v); } });
         players.sort(function (a, b) { return (b[field] || 0) - (a[field] || 0); });
@@ -11491,7 +11491,7 @@
         var barColors = { earnings: 'var(--gold)', kills: 'var(--red)', wins: 'var(--accent)', playcoins: '#22c55e' };
         var labels = { earnings: 'Total Earned', kills: 'Total Kills', wins: 'Matches Won', playcoins: 'Balance' };
         var unitPre = { earnings: 'Rs', kills: '', wins: '', playcoins: '₹' };
-        list.innerHTML = '<div style="padding:10px 14px 80px">' + players.slice(0, 20).map(function (p, i) {
+        list.innerHTML = '<div style="padding:10px 14px 80px">' + players.slice(0, 10).map(function (p, i) {
           var val = p[field] || 0, pct = Math.max(4, Math.round(val / maxVal * 100));
           var isMe = p.uid === (user && user.uid);
           var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
