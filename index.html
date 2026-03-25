@@ -12066,38 +12066,8 @@
           throw new Error('QR URL not found in API response');
         }
 
-        document.getElementById('topupPayAmt').textContent = topupSelectedAmount;
-
-        const qrImg = document.getElementById('dynamicQrImage');
-        const qrPlaceholder = document.getElementById('qrPlaceholderContent');
-        if (qrImg && qrPlaceholder) {
-          // 🚀 NINJA HACK: TranzUPI web link deta hai, photo nahi. 
-          // Isliye hum free API use karke us link ko Live QR Code Image bana rahe hain!
-          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(paymentLink)}`;
-          qrImg.style.display = 'block';
-          qrPlaceholder.style.display = 'none';
-
-          const qrBox = document.getElementById('topupQrBox');
-          if (qrBox) qrBox.style.animation = 'none';
-        }
-
-        // Switch step views
-        var step1 = document.getElementById('addStep1');
-        var step2 = document.getElementById('addStep2');
-        step1.style.opacity = '0';
-        step1.style.transform = 'translateX(-20px)';
-        step1.style.transition = 'all 0.25s ease';
-        setTimeout(function () {
-          step1.style.display = 'none';
-          step2.style.display = 'block';
-          step2.style.opacity = '0';
-          step2.style.transform = 'translateX(20px)';
-          step2.style.transition = 'all 0.25s ease';
-          requestAnimationFrame(function () {
-            step2.style.opacity = '1';
-            step2.style.transform = 'translateX(0)';
-          });
-        }, 250);
+        // Redirect user directly to the payment link
+        window.location.href = paymentLink;
 
       } catch (error) {
         console.error("Payment Error:", error);
