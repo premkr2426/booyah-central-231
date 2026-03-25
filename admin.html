@@ -3330,10 +3330,27 @@
       const el = document.getElementById('notifHistory');
       try {
         const snap = await db.ref('notifications').orderByChild('date').limitToLast(15).once('value');
-        const notifs = []; snap.forEach(c => notifs.unshift(c.val()));
+        const notifs = []; snap.forEach(c => notifs.unshift({ id: c.key, ...c.val() }));
         if (!notifs.length) { el.innerHTML = empty('fa-bell-slash', 'No notifications sent yet'); return; }
-        el.innerHTML = `<div class="activity-list">${notifs.map(n => `<div class="activity-item"><div style="font-size:1.2rem;flex-shrink:0;margin-top:2px">${n.icon || '🔔'}</div><div style="flex:1"><div class="activity-msg">${n.message}</div><div class="activity-time">${n.type === 'all' ? '📢 All players' : n.tournamentName ? ('🏆 ' + n.tournamentName) : '👤 Individual'} &nbsp;|&nbsp; ${fmtDate(n.date)}</div></div></div>`).join('')}</div>`;
+        el.innerHTML = `<div class="activity-list">${notifs.map(n => `<div class="activity-item" style="align-items:center"><div style="font-size:1.2rem;flex-shrink:0;margin-top:2px">${n.icon || '🔔'}</div><div style="flex:1"><div class="activity-msg">${n.message}</div><div class="activity-time">${n.type === 'all' ? '📢 All players' : n.tournamentName ? ('🏆 ' + n.tournamentName) : '👤 Individual'} &nbsp;|&nbsp; ${fmtDate(n.date)}</div></div><button class="btn-logout-sm" onclick="deleteNotification('${n.id}', '${n.type}', '${n.tournamentId || ''}')" style="width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(239,68,68,0.25);" title="Delete Notification"><i class="fas fa-trash"></i></button></div>`).join('')}</div>`;
       } catch (e) { }
+    }
+
+    async function deleteNotification(id, type, tournId) {
+      if (!confirm('Delete this notification?')) return;
+      try {
+        await db.ref('notifications/' + id).remove();
+        if (type === 'tournament' && tournId) {
+          const tSnap = await db.ref('tournaments/' + tournId + '/participants').once('value');
+          if (tSnap.exists()) {
+            const updates = {};
+            tSnap.forEach(p => { updates['users/' + p.key + '/personalNotifs/' + id] = null; });
+            if (Object.keys(updates).length) await db.ref().update(updates);
+          }
+        }
+        toast('Notification deleted!', 'success');
+        loadNotifHistory();
+      } catch (e) { toast('Error: ' + e.message, 'error'); }
     }
 
     // ═══════════════════════════════════════
