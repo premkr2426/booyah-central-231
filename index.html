@@ -10538,7 +10538,7 @@
     // GAME MODES
     // ═══════════════════════════════════════
     const MODE_DEFS = [
-      { name: 'BR SURVIVAL', icon: '💀', neon: '#ef4444', glow: 'rgba(239,68,68,0.4)', bg: '#0f0808', imgURL: 'https://i.pinimg.com/1200x/8b/ba/1f/8bba1f09ef82e1ee621200abd638b23b.jpg' },
+      { name: 'BR SURVIVAL', icon: '☠️', neon: '#ef4444', glow: 'rgba(239,68,68,0.4)', bg: '#0f0808', imgURL: 'https://i.pinimg.com/1200x/8b/ba/1f/8bba1f09ef82e1ee621200abd638b23b.jpg' },
       { name: 'BR FULL MAP', icon: '🗺️', neon: '#06b6d4', glow: 'rgba(6,182,212,0.4)', bg: '#050e12', imgURL: 'https://i.pinimg.com/736x/51/53/9f/51539f77693b69b5d1a418f2244f8e69.jpg' },
       { name: 'CLASH SQUAD 1VS1', icon: '⚔️', neon: '#f5a623', glow: 'rgba(245,166,35,0.4)', bg: '#0e0a00', imgURL: 'https://i.pinimg.com/736x/c2/1a/47/c21a476499771629b932ee28df4844a8.jpg' },
       { name: 'LONE WOLF 1VS1', icon: '🐺', neon: '#a855f7', glow: 'rgba(168,85,247,0.4)', bg: '#080010', imgURL: 'https://i.pinimg.com/736x/1c/1c/bb/1c1cbbee51db81bd54c4c842ee6802f9.jpg' },
@@ -11535,7 +11535,19 @@
           var arr = Object.values(txns).sort(function (a, b) { return b.date - a.date; });
           if (!arr.length) { txnList.innerHTML = empty('fa-receipt', 'No transactions yet'); return; }
           txnList.innerHTML = arr.slice(0, 20).map(function (t) {
-            return '<div class="txn-item"><div class="txn-icon ' + t.type + '"><i class="fas fa-' + (t.type === 'credit' ? 'arrow-down' : t.type === 'exchange' ? 'exchange-alt' : 'arrow-up') + '"></i></div><div class="txn-info"><div class="txn-desc">' + (t.desc || 'Transaction') + '</div><div class="txn-date">' + new Date(t.date).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + '</div></div><div class="txn-amt ' + t.type + '">' + (t.type === 'credit' ? '+' : t.type === 'exchange' ? '~' : '-') + 'Rs' + t.amount + '</div></div>';
+            var isSub = t.type === 'withdrawal' || t.type === 'debit' || t.amount < 0;
+            var isExchange = t.type === 'exchange';
+            var isAdd = !isSub && !isExchange;
+
+            var iconType = isAdd ? 'arrow-down' : isExchange ? 'exchange-alt' : 'arrow-up';
+            var colorClass = isAdd ? 'credit' : isExchange ? 'exchange' : 'debit';
+            var sign = isAdd ? '+' : isExchange ? '~' : '-';
+            var absAmount = Math.abs(t.amount || 0);
+            
+            var title = t.desc || 'Transaction';
+            if (t.type === 'withdrawal') title = 'Withdrawal';
+
+            return '<div class="txn-item"><div class="txn-icon ' + colorClass + '"><i class="fas fa-' + iconType + '"></i></div><div class="txn-info"><div class="txn-desc">' + title + '</div><div class="txn-date">' + new Date(t.date).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + '</div></div><div class="txn-amt ' + colorClass + '">' + sign + 'Rs' + absAmount + '</div></div>';
           }).join('');
         }).catch(function () { });
       });
@@ -11556,7 +11568,7 @@
 
       loader(true);
       try {
-        const res = await fetch('https://booyah-backend.onrender.com/api/withdraw', {
+        const res = await fetch('/api/withdraw', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ffUid: user ? user.uid : "847593847", amount: Number(amt), cost: Number(amt), upiId: upi })
@@ -12049,7 +12061,7 @@
         console.log('TranzUPI Response:', data);
 
         const qrUrl = data?.data?.qrUrl || data?.qrData || data?.data?.payload?.qr_link || data?.qr || data?.data?.payment_url;
-        
+
         if (!qrUrl) {
           throw new Error('QR URL not found in API response');
         }
