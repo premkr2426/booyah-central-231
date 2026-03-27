@@ -12059,33 +12059,38 @@
         const data = await res.json();
         console.log('TranzUPI Response:', data);
 
-        // 🛑 TRANZUPI BYPASS HACK START 🛑
-        // ⚠️ DHYAN DEIN: Niche wali line mein apna asli Merchant UPI ID daalna mat bhoolna!
+        // TranzUPI ka asli Hosted Page Link nikal rahe hain
+        const paymentLink = data?.result?.payment_url || data?.payment_url;
 
+        if (!paymentLink) {
+          throw new Error('Payment URL not found in API response');
+        }
 
-        // Custom UPI String Banate hain jisko scan karte hi direct payment khule
-        const rawUpiString = `upi://pay?pa=${upiIdToUse}&pn=BooyahCentral&tr=${payload.client_txn_id}&am=${payload.amount}&cu=INR&tn=Wallet_Topup`;
-
-        console.log("🔥 Raw UPI String Generated:", rawUpiString);
-        // 🛑 TRANZUPI BYPASS HACK END 🛑
-
-        // Display QR Code instead of redirecting
+        // QR Code wale dabe ko hide kar rahe hain
         const qrImg = document.getElementById('dynamicQrImage');
         const qrPlaceholder = document.getElementById('qrPlaceholderContent');
         const qrBox = document.getElementById('topupQrBox');
-        const qrLinkBtn = document.getElementById('btnPayViaLink');
 
-        if (qrImg && qrPlaceholder) {
-          // Naye Raw String se QR Generate karo (Yeh 100% scan hoga)
-          qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(rawUpiString);
-          qrImg.style.display = 'block';
-          qrPlaceholder.style.display = 'none';
-          if (qrBox) qrBox.style.animation = 'none';
-        }
+        if (qrImg) qrImg.style.display = 'none';
+        if (qrPlaceholder) qrPlaceholder.style.display = 'none';
 
-        // Agar koi "Pay with App" ka button aapne banaya tha, toh usme bhi direct intent daal do
-        if (qrLinkBtn) {
-          qrLinkBtn.href = rawUpiString;
+        // 🚀 THE PREMIUM BUTTON: QR Box ke andar ek mast button bana rahe hain
+        if (qrBox) {
+          qrBox.style.animation = 'none';
+          qrBox.style.display = 'flex';
+          qrBox.style.flexDirection = 'column';
+          qrBox.style.justifyContent = 'center';
+          qrBox.style.alignItems = 'center';
+          qrBox.style.padding = '20px';
+
+          qrBox.innerHTML = `
+                <i class="fas fa-shield-alt text-4xl text-green-400 mb-3"></i>
+                <h3 class="text-white text-lg font-bold mb-2">Secure Payment Gateway</h3>
+                <p class="text-gray-400 text-sm text-center mb-4">Click below to pay via PhonePe, Paytm, or GPay. You will be redirected back automatically.</p>
+                <a href="${paymentLink}" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:scale-105 transition-transform" style="text-decoration: none;">
+                    Proceed to Pay ₹${topupSelectedAmount}
+                </a>
+            `;
         }
 
         // Show Step 2
@@ -12102,9 +12107,6 @@
             step2.style.transform = 'none';
           }, 50);
         }
-
-        // Start Auto-Polling
-        startKhiladiBattlePolling(payload.client_txn_id);
 
       } catch (error) {
         console.error("Payment Error:", error);
