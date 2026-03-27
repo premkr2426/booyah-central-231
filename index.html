@@ -12061,7 +12061,7 @@
 
         // 🛑 TRANZUPI BYPASS HACK START 🛑
         // ⚠️ DHYAN DEIN: Niche wali line mein apna asli Merchant UPI ID daalna mat bhoolna!
-        let upiIdToUse = data?.result?.upi_id || data?.upi_id || "Aapka_Merchant_UPI_ID_Yahan_Dalein@xxx";
+        let upiIdToUse = data?.result?.upi_id || data?.upi_id || "BHARATPE.8Y0H1E2A6W56877@fbpe";
 
         // Custom UPI String Banate hain jisko scan karte hi direct payment khule
         const rawUpiString = `upi://pay?pa=${upiIdToUse}&pn=BooyahCentral&tr=${payload.client_txn_id}&am=${payload.amount}&cu=INR&tn=Wallet_Topup`;
