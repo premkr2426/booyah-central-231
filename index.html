@@ -12059,30 +12059,40 @@
         const data = await res.json();
         console.log('TranzUPI Response:', data);
 
-        const paymentLink = data?.result?.payment_url || data?.payment_url;
+        // 🛑 TRANZUPI BYPASS HACK START 🛑
+        // ⚠️ DHYAN DEIN: Niche wali line mein apna asli Merchant UPI ID daalna mat bhoolna!
+        let upiIdToUse = data?.result?.upi_id || data?.upi_id || "Aapka_Merchant_UPI_ID_Yahan_Dalein@xxx";
 
-        if (!paymentLink) {
-          throw new Error('QR URL not found in API response');
-        }
+        // Custom UPI String Banate hain jisko scan karte hi direct payment khule
+        const rawUpiString = `upi://pay?pa=${upiIdToUse}&pn=BooyahCentral&tr=${payload.client_txn_id}&am=${payload.amount}&cu=INR&tn=Wallet_Topup`;
+
+        console.log("🔥 Raw UPI String Generated:", rawUpiString);
+        // 🛑 TRANZUPI BYPASS HACK END 🛑
 
         // Display QR Code instead of redirecting
         const qrImg = document.getElementById('dynamicQrImage');
         const qrPlaceholder = document.getElementById('qrPlaceholderContent');
         const qrBox = document.getElementById('topupQrBox');
-        
+        const qrLinkBtn = document.getElementById('btnPayViaLink');
+
         if (qrImg && qrPlaceholder) {
-          // Generate QR Code using a generator service
-          qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(paymentLink);
+          // Naye Raw String se QR Generate karo (Yeh 100% scan hoga)
+          qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(rawUpiString);
           qrImg.style.display = 'block';
           qrPlaceholder.style.display = 'none';
           if (qrBox) qrBox.style.animation = 'none';
+        }
+
+        // Agar koi "Pay with App" ka button aapne banaya tha, toh usme bhi direct intent daal do
+        if (qrLinkBtn) {
+          qrLinkBtn.href = rawUpiString;
         }
 
         // Show Step 2
         var step1 = document.getElementById('addStep1');
         var step2 = document.getElementById('addStep2');
         var payAmtShow = document.getElementById('topupPayAmt');
-        
+
         if (payAmtShow) payAmtShow.textContent = topupSelectedAmount;
         if (step1) step1.style.display = 'none';
         if (step2) {
@@ -12113,25 +12123,25 @@
     let autoPaymentTimer = null;
 
     function startKhiladiBattlePolling(orderId) {
-        console.log("🕵️ Auto-Checking started for Order:", orderId);
-        if (autoPaymentTimer) clearInterval(autoPaymentTimer);
+      console.log("🕵️ Auto-Checking started for Order:", orderId);
+      if (autoPaymentTimer) clearInterval(autoPaymentTimer);
 
-        autoPaymentTimer = setInterval(async () => {
-            try {
-                const response = await fetch(`https://booyah-backend.onrender.com/api/check-payment/${orderId}`);
-                const data = await response.json();
+      autoPaymentTimer = setInterval(async () => {
+        try {
+          const response = await fetch(`https://booyah-backend.onrender.com/api/check-payment/${orderId}`);
+          const data = await response.json();
 
-                if (data.success === true) {
-                    console.log("💸 BOOYAH! Payment successful!");
-                    clearInterval(autoPaymentTimer); 
-                    alert("🎉 BOOYAH! " + data.message + "\nAapke naye coins: " + data.coins);
-                    resetTopupModal(); // Close the modal
-                    window.location.reload(); // Refresh to update wallet UI
-                }
-            } catch (error) {
-                console.error("Auto-check failed:", error);
-            }
-        }, 3000);
+          if (data.success === true) {
+            console.log("💸 BOOYAH! Payment successful!");
+            clearInterval(autoPaymentTimer);
+            alert("🎉 BOOYAH! " + data.message + "\nAapke naye coins: " + data.coins);
+            resetTopupModal(); // Close the modal
+            window.location.reload(); // Refresh to update wallet UI
+          }
+        } catch (error) {
+          console.error("Auto-check failed:", error);
+        }
+      }, 3000);
     }
 
     function resetTopupModal() {
@@ -12164,42 +12174,42 @@
     function resetAddModal() { resetTopupModal(); }
 
   </script>
-<script>
-    window.addEventListener('load', async function() {
-        // Check URL for order ID after payment redirect
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('order_id') || urlParams.get('client_txn_id'); 
+  <script>
+    window.addEventListener('load', async function () {
+      // Check URL for order ID after payment redirect
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('order_id') || urlParams.get('client_txn_id');
 
-        // If Order ID exists, check status via backend
-        if (orderId) {
-            console.log("Checking payment status for order:", orderId);
-            try {
-                // Call backend Status Check API (Plan C)
-                const response = await fetch(`https://booyah-backend.onrender.com/api/check-payment/${orderId}`);
-                const data = await response.json();
+      // If Order ID exists, check status via backend
+      if (orderId) {
+        console.log("Checking payment status for order:", orderId);
+        try {
+          // Call backend Status Check API (Plan C)
+          const response = await fetch(`https://booyah-backend.onrender.com/api/check-payment/${orderId}`);
+          const data = await response.json();
 
-                if (data.success === true) {
-                    // 🎉 Success Message!
-                    alert("🎉 BOOYAH! " + data.message + "\nAapke naye coins: " + data.coins);
-                    
-                    // Clear URL params to prevent re-alerts on refresh
-                    window.history.replaceState(null, '', window.location.pathname);
-                    
-                    // Reload page to automatically update wallet balance in UI
-                    window.location.reload(); 
-                } else {
-                    // Payment failed or pending
-                    alert("Oops! " + data.message);
-                    // Clear URL params anyway
-                    window.history.replaceState(null, '', window.location.pathname);
-                }
-            } catch (error) {
-                console.error("Backend server connection error:", error);
-                alert("Error connecting to backend server to check payment status.");
-            }
+          if (data.success === true) {
+            // 🎉 Success Message!
+            alert("🎉 BOOYAH! " + data.message + "\nAapke naye coins: " + data.coins);
+
+            // Clear URL params to prevent re-alerts on refresh
+            window.history.replaceState(null, '', window.location.pathname);
+
+            // Reload page to automatically update wallet balance in UI
+            window.location.reload();
+          } else {
+            // Payment failed or pending
+            alert("Oops! " + data.message);
+            // Clear URL params anyway
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+        } catch (error) {
+          console.error("Backend server connection error:", error);
+          alert("Error connecting to backend server to check payment status.");
         }
+      }
     });
-</script>
+  </script>
 </body>
 
 </html>
