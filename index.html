@@ -12177,43 +12177,46 @@
 
   </script>
   <script>
-    // 🔄 SUPER AUTO-BALANCE FETCHER (Har 3 second mein apne aap balance check karega)
+    // 🔄 SUPER AUTO-BALANCE FETCHER (100% PERFECT FIX)
     async function syncMyBalance() {
-      // Firebase se Asli UID ya Test UID nikalna
-      const currentUid = typeof user !== 'undefined' && user ? user.uid : "847593847";
+      // Firebase se Asli UID nikalna
+      const currentUid = (typeof user !== 'undefined' && user && user.uid) ? user.uid : "847593847";
 
       try {
         const response = await fetch(`https://booyah-backend.onrender.com/api/user/${currentUid}`);
         const data = await response.json();
 
+        // JADOO YAHAN HAI: Backend se 'coins' aa raha hai, usko pakdo
         if (data && data.coins !== undefined) {
-          // 1. Wallet Tab wala balance update karega
+          const realCoins = data.coins;
+
+          // 1. App ke global system ko update karo (Taaki Withdraw me "0" na bole)
+          window.realUserBalance = realCoins;
+          if (typeof user !== 'undefined' && user) {
+            user.balance = realCoins;
+          }
+
+          // 2. Wallet Tab wale bade dabbe ko update karo
           const walletTotal = document.getElementById('walletTotalDisplay');
           if (walletTotal) {
-            walletTotal.innerHTML = `₹${data.coins}`;
+            walletTotal.innerHTML = `₹${realCoins}`;
           }
 
-          // 2. Upar Header wala balance update karega (Agar id di hai)
-          const headerBalance = document.getElementById('walletBalance');
+          // 3. Upar Header wale chote balance ko update karo (ASLI ID lagayi hai)
+          const headerBalance = document.getElementById('hdrTotalBalance');
           if (headerBalance) {
-            headerBalance.textContent = data.coins;
-          }
-
-          // 3. Profile wala balance update karega (Agar id di hai)
-          const profileBalance = document.getElementById('userCoinsDisplay');
-          if (profileBalance) {
-            profileBalance.textContent = data.coins;
+            headerBalance.textContent = realCoins;
           }
         }
       } catch (error) {
-        console.log("Balance sync background error");
+        console.log("Silent Background Fetch Error:", error);
       }
     }
 
-    // Page load hote hi ek baar chalao
-    setTimeout(syncMyBalance, 2000); // 2 second rukk kar chalega taaki Firebase load ho jaye
+    // Page load hote hi 2 second baad chalega
+    setTimeout(syncMyBalance, 2000);
 
-    // 🪄 JADOO: Har 3 second mein background mein apne aap balance refresh karega!
+    // Har 3 second mein chupke-chupke check karega
     setInterval(syncMyBalance, 3000);
   </script>
 </body>
