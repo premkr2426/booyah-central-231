@@ -12177,38 +12177,34 @@
 
   </script>
   <script>
-    window.addEventListener('load', async function () {
-      // Check URL for order ID after payment redirect
-      const urlParams = new URLSearchParams(window.location.search);
-      const orderId = urlParams.get('order_id') || urlParams.get('client_txn_id');
+    // 🔄 AUTO-BALANCE FETCHER (Page load hote hi Wallet Update karega)
+    window.addEventListener('DOMContentLoaded', async function () {
+      // Player ka UID nikal rahe hain (Test account ka UID daala hai abhi)
+      const currentUid = typeof user !== 'undefined' && user ? user.uid : "847593847";
 
-      // If Order ID exists, check status via backend
-      if (orderId) {
-        console.log("Checking payment status for order:", orderId);
-        try {
-          // Call backend Status Check API (Plan C)
-          const response = await fetch(`https://booyah-backend.onrender.com/api/check-payment/${orderId}`);
-          const data = await response.json();
+      console.log("🕵️ Fetching latest balance for UID:", currentUid);
 
-          if (data.success === true) {
-            // 🎉 Success Message!
-            alert("🎉 BOOYAH! " + data.message + "\nAapke naye coins: " + data.coins);
+      try {
+        const response = await fetch(`https://booyah-backend.onrender.com/api/user/${currentUid}`);
+        const data = await response.json();
 
-            // Clear URL params to prevent re-alerts on refresh
-            window.history.replaceState(null, '', window.location.pathname);
-
-            // Reload page to automatically update wallet balance in UI
-            window.location.reload();
-          } else {
-            // Payment failed or pending
-            alert("Oops! " + data.message);
-            // Clear URL params anyway
-            window.history.replaceState(null, '', window.location.pathname);
+        if (data && data.coins !== undefined) {
+          // YAHAN HAI ASLI JADOO: Aapke Wallet Tab ka balance update ho raha hai!
+          const walletTotal = document.getElementById('walletTotalDisplay');
+          if (walletTotal) {
+            walletTotal.innerHTML = `₹${data.coins}`; // '₹236' dikhayega
           }
-        } catch (error) {
-          console.error("Backend server connection error:", error);
-          alert("Error connecting to backend server to check payment status.");
+
+          // Agar header mein bhi koi balance hai (id="walletBalance" naam ka), toh usko bhi update karega
+          const headerBalance = document.getElementById('walletBalance');
+          if (headerBalance) {
+            headerBalance.textContent = data.coins;
+          }
+
+          console.log("🎉 BOOYAH! Asli Balance Screen Par Aa Gaya:", data.coins);
         }
+      } catch (error) {
+        console.error("Balance lane mein error aaya:", error);
       }
     });
   </script>
