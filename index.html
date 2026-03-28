@@ -11120,9 +11120,13 @@
       const now = Date.now(), start = new Date(t.date + ' ' + t.time).getTime(), dur = (t.duration || 60) * 60000;
       if (now > start + dur) return 'ended';
       if (now >= start) return 'live';   // match started = LIVE/ONGOING (joining still allowed if slots free)
-      if (start - now < 30 * 60000) return 'soon';  // <30min = SOON (also shown in upcoming)
+
+      // 🚨 NAYA JADOO: Ab sirf 2 minute pehle SOON hoga! 
+      if (start - now < 2 * 60000) return 'soon';  // <2min = SOON (also shown in upcoming)
+
       return 'upcoming';
     }
+
     const cdMap = {};
     function startCd(id, dateStr) {
       if (cdMap[id]) clearInterval(cdMap[id]);
@@ -11369,8 +11373,11 @@
       const status = getTStatus(t), joined = user.joinedTournaments?.[id];
       document.getElementById('joinModalTitle').textContent = t.name || 'Tournament';
       if (joined) {
-        const start = new Date((t.date || '') + ' ' + (t.time || '00:00')).getTime(), showRoom = Date.now() >= start - 30 * 60000;
-        document.getElementById('joinModalBody').innerHTML = `<div style="text-align:center;margin-bottom:12px;font-size:0.78rem;color:var(--green)">✅ You have joined this tournament!</div>${showRoom ? `<div class="room-box"><div class="room-field"><span class="room-lbl">Room ID</span><div class="room-val">${t.roomId || 'TBD'}<button type="button" class="btn-copy-sm" onclick="copyTxt('${t.roomId || ''}')">Copy</button></div></div><div class="room-field"><span class="room-lbl">Password</span><div class="room-val">${t.roomPass || 'TBD'}<button type="button" class="btn-copy-sm" onclick="copyTxt('${t.roomPass || ''}')">Copy</button></div></div></div>` : '<div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;font-size:0.78rem;color:var(--text-dim);margin-bottom:14px"><i class="fas fa-lock" style="color:var(--accent);font-size:1.1rem;display:block;margin-bottom:6px"></i>Room details shared 8–10 min before match</div>'}<button type="button" class="btn-primary" onclick="closeModal('joinModal')"><span class="btn-label">CLOSE</span></button>`;
+        // 🚨 NAYA JADOO: Yahan 30 ko 2 kiya gaya hai
+        const start = new Date((t.date || '') + ' ' + (t.time || '00:00')).getTime(), showRoom = Date.now() >= start - 2 * 60000;
+
+        // 🚨 NAYA JADOO: Yahan message mein "2 min" kiya gaya hai
+        document.getElementById('joinModalBody').innerHTML = `<div style="text-align:center;margin-bottom:12px;font-size:0.78rem;color:var(--green)">✅ You have joined this tournament!</div>${showRoom ? `<div class="room-box"><div class="room-field"><span class="room-lbl">Room ID</span><div class="room-val">${t.roomId || 'TBD'}<button type="button" class="btn-copy-sm" onclick="copyTxt('${t.roomId || ''}')">Copy</button></div></div><div class="room-field"><span class="room-lbl">Password</span><div class="room-val">${t.roomPass || 'TBD'}<button type="button" class="btn-copy-sm" onclick="copyTxt('${t.roomPass || ''}')">Copy</button></div></div></div>` : '<div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;font-size:0.78rem;color:var(--text-dim);margin-bottom:14px"><i class="fas fa-lock" style="color:var(--accent);font-size:1.1rem;display:block;margin-bottom:6px"></i>Room details shared 2 min before match</div>'}<button type="button" class="btn-primary" onclick="closeModal('joinModal')"><span class="btn-label">CLOSE</span></button>`;
       } else {
         if (status === 'ended') return toast('Tournament ended', 'error');
         const fee = t.entryFee || 0;
