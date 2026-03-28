@@ -11434,41 +11434,75 @@
       var gameUIDEl = document.getElementById('joinGameUID');
       var ingameName = (ingameNameEl ? ingameNameEl.value : '').trim();
       var gameUID = (gameUIDEl ? gameUIDEl.value : '').trim();
+
       if (!ingameName) return toast('In-Game Name daalo!', 'error');
       if (!gameUID || gameUID.length < 6) return toast('Sahi Free Fire UID daalo!', 'error');
+
       // Unified balance check
       var winBalance = window.realUserBalance !== undefined ? window.realUserBalance : (user.balance || 0);
       var totalBalance = winBalance;
+
       if (fee > 0 && totalBalance < fee) return toast('Insufficient balance! ₹' + fee + ' required', 'error');
+
       loader(true);
       var now = Date.now();
       var updates = {};
+
       updates['users/' + user.uid + '/inGameName'] = ingameName;
       updates['users/' + user.uid + '/gameUID'] = gameUID;
+
       // Deduct fee explicitly from coins
       if (fee > 0) {
+        // Firebase mein update (Purana code)
         updates['users/' + user.uid + '/balance'] = (user.balance || 0) - fee;
         updates['users/' + user.uid + '/transactions/T' + now] = { type: 'debit', amount: fee, desc: 'Joined ' + t.name + ' (₹' + fee + ')', date: now };
+
+        // 🚨 NAYA JADOO: MongoDB (Render Backend) se bhi paise kaato!
+        fetch('https://booyah-backend.onrender.com/api/user/deduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ffUid: user.uid, amount: fee })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              console.log("✅ MongoDB se deduction successful! Naya Balance:", data.coins);
+              // Turant UI update karne ke liye fetcher ko aawaz lagao
+              if (typeof syncMyBalance === 'function') syncMyBalance();
+            }
+          })
+          .catch(err => console.log("Backend deduction issue:", err));
       }
+
       updates['users/' + user.uid + '/matches'] = (user.matches || 0) + 1;
       updates['users/' + user.uid + '/joinedTournaments/' + id] = { joinedAt: now, fee: fee };
       updates['tournaments/' + id + '/filledSlots'] = (t.filledSlots || 0) + 1;
       updates['tournaments/' + id + '/participants/' + user.uid] = { name: user.name, inGameName: ingameName, gameUID: gameUID, joinedAt: now };
+
       db.ref().update(updates).then(function () {
         return db.ref('users/' + user.uid).once('value');
       }).then(function (freshSnap) {
         var v = freshSnap.val(); v.uid = user.uid; user = v; lsSet('bc_user', JSON.stringify(user));
-        updateHeaderUI(); updateMatchCounts();
-        toast('🎮 Match joined! All the best! 🔥', 'success'); confetti();
+
+        updateHeaderUI();
+        updateMatchCounts();
+
+        toast('🎮 Match joined! All the best! 🔥', 'success');
+        confetti();
         closeModal('joinModal');
+
         if (document.getElementById('modeTournamentsView').classList.contains('open')) renderModeCards();
+
         if (currentContestId === id) {
           var joinBtn = document.getElementById('cdJoinBtn');
           joinBtn.className = 'btn-join-match joined-state';
           joinBtn.innerHTML = '<i class="fas fa-door-open"></i> ALREADY JOINED';
           _updateCdRoomSection(id, t);
         }
-      }).catch(function (e) { toast('Failed to join: ' + e.message, 'error'); });
+      }).catch(function (e) {
+        toast('Failed to join: ' + e.message, 'error');
+      });
+
       loader(false);
     }
 
