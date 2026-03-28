@@ -12218,6 +12218,38 @@
 
     // Har 3 second mein chupke-chupke check karega
     setInterval(syncMyBalance, 3000);
+    // 🚨 RETURN-TRIP JADOO: Payment se wapas aane par automatic verify karega!
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnedOrderId = urlParams.get('order_id'); // URL se Order ID nikalo
+
+      if (returnedOrderId) {
+        console.log("🕵️ Player wapas aaya payment karke! Order ID:", returnedOrderId);
+
+        if (typeof toast === 'function') toast("Verifying Payment...", "info");
+
+        // Backend ke "Plan C" (Collar Pakad API) ko call karo
+        fetch(`https://booyah-backend.onrender.com/api/check-payment/${returnedOrderId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              // ✅ Payment Success! Paise add ho gaye!
+              if (typeof toast === 'function') toast("🎉 BOOYAH! Payment Verified!", "success");
+
+              // Turant screen par balance update karo
+              syncMyBalance();
+
+              // URL ko saaf kar do taaki refresh karne par wapas check na kare
+              window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+              if (typeof toast === 'function') toast("Payment processing or pending...", "info");
+            }
+          })
+          .catch(err => {
+            console.error("Verification Error:", err);
+          });
+      }
+    }); 
   </script>
 </body>
 
