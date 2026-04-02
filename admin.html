@@ -2726,6 +2726,27 @@
     </div>
   </div>
 
+  <!-- ══ VIEW PLAYERS MODAL ══ -->
+  <div id="viewPlayersModal" class="modal" style="display: none;">
+      <div class="modal-content" style="background: var(--bg3); padding: 20px; border-radius: var(--r); max-width: 600px; margin: auto; position: relative; border: 1px solid var(--border);">
+          <span class="close" onclick="closePlayersModal()" style="position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 1.5rem; color: var(--text);">&times;</span>
+          <h2 style="font-family: 'Rajdhani', sans-serif; margin-bottom: 15px;"><i class="fas fa-users" style="color:var(--accent)"></i> Joined Players</h2>
+          <div class="table-container tbl-wrap">
+              <table class="data-table">
+                  <thead>
+                      <tr>
+                          <th>In-Game Name</th>
+                          <th>Game ID / UID</th>
+                          <th>Status</th>
+                      </tr>
+                  </thead>
+                  <tbody id="playersListBody">
+                  </tbody>
+              </table>
+          </div>
+      </div>
+  </div>
+
   <!-- ══ CONFIRM MODAL ══ -->
   <div class="modal" id="confirmModal">
     <div class="modal-box" style="max-width:380px">
@@ -2914,7 +2935,7 @@
       const el = document.getElementById('tournamentsTable');
       if (!entries.length) { el.innerHTML = empty('fa-trophy', 'No tournaments found'); return; }
       const bulkMode = window._bulkMode || false;
-      el.innerHTML = `<div class="tbl-wrap"><table><thead><tr>${bulkMode ? '<th style=\"width:36px\"><input type=\"checkbox\" id=\"selectAllChk\" onchange=\"toggleAllCheckboxes(this)\"></th>' : ''}<th>Tournament</th><th class="tw-col">Mode</th><th>Slots</th><th>Fee / Prize</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${entries.map(([id, t]) => { const s = getTStatus(t), f = t.filledSlots || 0, sl = t.totalSlots || 100; return `<tr><td>${bulkMode ? `<input type="checkbox" class="t-chk" value="${id}" onchange="updateSelectedCount()">` : ''}<div class="td-name">${t.name || 'Untitled'}</div><div class="td-sub">#${t.matchId || id.slice(-5)}</div></td><td><span style="font-size:0.74rem;color:var(--dim)">${t.modeName || '—'}</span></td><td><div style="font-size:0.78rem">${f}/${sl}</div><div style="height:3px;background:var(--bg5);border-radius:2px;margin-top:3px;width:60px;overflow:hidden"><div style="height:100%;width:${Math.min(100, f / sl * 100)}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px"></div></div></td><td><span style="color:var(--accent);font-size:0.76rem">₹${t.entryFee || 0}</span> / <span style="color:var(--gold);font-size:0.76rem">₹${t.prizePool || 0}</span></td><td><span style="font-size:0.74rem;color:var(--dim)">${t.date || 'TBD'}</span><br><span style="font-size:0.68rem;color:var(--dim)">${t.time || ''}</span></td><td><span class="badge ${s}">${s.toUpperCase()}</span></td><td><div class="action-btns"><button type="button" class="btn-act edit" onclick="openEditTournament('${id}')"><i class="fas fa-edit"></i></button><button type="button" class="btn-act notif" onclick="quickNotifTournament('${id}','${(t.name || '').replace(/'/g, '&apos;')}')"><i class="fas fa-bell"></i></button><button type="button" class="btn-act del" onclick="deleteTournament('${id}','${(t.name || '').replace(/'/g, '&apos;')}')"><i class="fas fa-trash"></i></button></div></td></tr>`; }).join('')}</tbody></table></div>`;
+      el.innerHTML = `<div class="tbl-wrap"><table><thead><tr>${bulkMode ? '<th style=\"width:36px\"><input type=\"checkbox\" id=\"selectAllChk\" onchange=\"toggleAllCheckboxes(this)\"></th>' : ''}<th>Tournament</th><th class="tw-col">Mode</th><th>Slots</th><th>Fee / Prize</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${entries.map(([id, t]) => { const s = getTStatus(t), f = t.filledSlots || 0, sl = t.totalSlots || 100; return `<tr><td>${bulkMode ? `<input type="checkbox" class="t-chk" value="${id}" onchange="updateSelectedCount()">` : ''}<div class="td-name">${t.name || 'Untitled'}</div><div class="td-sub">#${t.matchId || id.slice(-5)}</div></td><td><span style="font-size:0.74rem;color:var(--dim)">${t.modeName || '—'}</span></td><td><div style="font-size:0.78rem">${f}/${sl}</div><div style="height:3px;background:var(--bg5);border-radius:2px;margin-top:3px;width:60px;overflow:hidden"><div style="height:100%;width:${Math.min(100, f / sl * 100)}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px"></div></div></td><td><span style="color:var(--accent);font-size:0.76rem">₹${t.entryFee || 0}</span> / <span style="color:var(--gold);font-size:0.76rem">₹${t.prizePool || 0}</span></td><td><span style="font-size:0.74rem;color:var(--dim)">${t.date || 'TBD'}</span><br><span style="font-size:0.68rem;color:var(--dim)">${t.time || ''}</span></td><td><span class="badge ${s}">${s.toUpperCase()}</span></td><td><div class="action-btns"><button type="button" class="action-btn view-btn btn-act" onclick="viewTournamentPlayers('${id}')" title="View Players"><i class="fas fa-eye"></i></button><button type="button" class="btn-act edit" onclick="openEditTournament('${id}')"><i class="fas fa-edit"></i></button><button type="button" class="btn-act notif" onclick="quickNotifTournament('${id}','${(t.name || '').replace(/'/g, '&apos;')}')"><i class="fas fa-bell"></i></button><button type="button" class="btn-act del" onclick="deleteTournament('${id}','${(t.name || '').replace(/'/g, '&apos;')}')"><i class="fas fa-trash"></i></button></div></td></tr>`; }).join('')}</tbody></table></div>`;
     }
     function openCreateModal() { tEditId = null; document.getElementById('tModalTitle').textContent = 'Create Tournament'; clearTForm(); document.getElementById('tModal').classList.add('show'); }
     function openEditTournament(id) {
@@ -3007,6 +3028,39 @@
       });
     }
     function quickNotifTournament(id, name) { showPage('notifications'); setTimeout(() => { document.getElementById('nType').value = 'tournament'; updateNotifType(); document.getElementById('nTournament').value = id; document.getElementById('nMessage').value = `📢 Match update for ${name}!`; }, 100); }
+
+    async function viewTournamentPlayers(tournamentId) {
+        const modal = document.getElementById('viewPlayersModal');
+        const tbody = document.getElementById('playersListBody');
+        modal.style.display = 'flex';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px; color: var(--text);">Loading players...</td></tr>';
+
+        try {
+            // Yeh backend API call hai players fetch karne ke liye
+            const response = await fetch(`https://booyah-backend.onrender.com/api/tournaments/${tournamentId}/players`);
+            if (!response.ok) throw new Error('Failed to fetch');
+            const data = await response.json();
+
+            if (data.players && data.players.length > 0) {
+                tbody.innerHTML = data.players.map(player => `
+                    <tr>
+                        <td><span class="td-name">${player.inGameName}</span></td>
+                        <td><span class="td-mono">${player.gameId}</span></td>
+                        <td><span class="badge ${player.status === 'paid' ? 'done' : 'pending'}">${player.status}</span></td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px; color: var(--dim);">No players joined yet.</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px; color: var(--red);">Error loading data!</td></tr>';
+        }
+    }
+
+    function closePlayersModal() {
+        document.getElementById('viewPlayersModal').style.display = 'none';
+    }
 
     // ═══════════════════════════════════════
     // DECLARE RESULTS
