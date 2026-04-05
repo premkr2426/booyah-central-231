@@ -538,18 +538,19 @@
 
     <!-- EARN TAB -->
     <div class="tab-page" id="earnTab">
-      <div style="padding: 60px 20px; text-align: center; margin-top: 30px;">
-        <div
-          style="font-size: 5rem; margin-bottom: 25px; animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-          🚧</div>
-        <div
-          style="font-family: 'Orbitron', sans-serif; font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, #f5a623, #ffcc44); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; letter-spacing: 2px;">
-          COMING SOON
+      <div style="padding: 30px 20px; text-align: center; max-width: 500px; margin: 0 auto;">
+        <div style="font-family: var(--font-pirate); font-size: 2.5rem; font-weight: 400; color: var(--gold); text-shadow: 0 0 10px rgba(245,166,35,0.4); margin-bottom: 10px;">
+          Treasure Trove
         </div>
-        <div
-          style="font-size: 1.1rem; color: #94a3b8; line-height: 1.7; max-width: 450px; margin: 0 auto; font-weight: 600;">
-          Here you will be able to perform simple tasks like watching ads, spinning a wheel, or checking in daily to
-          earn Free Coins! Use these free coins to play and win real money.
+        <div style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 20px;">
+          Complete the premium tasks below to earn free coins! Use these coins to play and win real money.
+        </div>
+        
+        <div id="offerwall-container" style="background: rgba(15, 24, 41, 0.6); border: 1px solid rgba(245, 166, 35, 0.2); border-radius: 16px; min-height: 400px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); overflow: hidden; position: relative;">
+          <div id="offerwall-loader" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.9rem; animation: pulse 1.5s infinite;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--gold); margin-bottom: 15px;"></i>
+            <span style="font-weight: 600; letter-spacing: 1px;">Loading premium offers...</span>
+          </div>
         </div>
       </div>
 
@@ -6001,7 +6002,10 @@
       if (navEl) navEl.classList.add('active');
       if (name === 'leaderboard') loadLeaderboard();
       if (name === 'wallet') loadWallet();
-      if (name === 'earn') initTaskSystem();
+      if (name === 'earn') {
+        initTaskSystem();
+        if (typeof loadOfferWall === 'function') loadOfferWall();
+      }
       if (name === 'menu') loadProfile();
       
       updateHeader(name);
@@ -7115,8 +7119,34 @@
     }
 
     // ═══════════════════════════════════════
-    // EARN
+    // EARN / TREASURE
     // ═══════════════════════════════════════
+    function loadOfferWall() {
+      const container = document.getElementById('offerwall-container');
+      if (!container) return;
+      
+      // Clear any previous duplicated scripts keeping the structure
+      container.innerHTML = `
+        <div id="offerwall-loader" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.9rem;">
+          <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--gold); margin-bottom: 15px;"></i>
+          <span style="font-weight: 600; letter-spacing: 1px;">Loading premium offers...</span>
+        </div>
+      `;
+      
+      const currentUid = (typeof user !== 'undefined' && user && (user.ffUid || user.uid)) || 'guest';
+      const scriptUrl = `https://tundrafile.com/script_include.php?id=1888061&tracking_id=${currentUid}`;
+      
+      const scriptEl = document.createElement('script');
+      scriptEl.type = 'text/javascript';
+      scriptEl.src = scriptUrl;
+      scriptEl.onload = function() {
+        const loader = document.getElementById('offerwall-loader');
+        if (loader) loader.style.display = 'none';
+      };
+      
+      container.appendChild(scriptEl);
+    }
+
     function loadEarnPage() {
       if (!user) return;
       document.getElementById('earnBalance').textContent = user.balance || 0;
