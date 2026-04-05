@@ -2,97 +2,151 @@
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
-<title>BOOYAH CENTRAL - WANTED</title>
-<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Rye&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          pirate: {
-            bg: '#0a0f1d',
-            panel: '#111827',
-            gold: '#fbbf24',
-            gold_dim: '#d97706',
-            parchment: '#fef3c7',
-            bounty: '#78350f',
-            red: '#ef4444',
-            blue: '#0ea5e9',
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>BOOYAH CENTRAL - WANTED</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Rye&family=Outfit:wght@400;600;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pirate: {
+              bg: '#0a0f1d',
+              panel: '#111827',
+              gold: '#fbbf24',
+              gold_dim: '#d97706',
+              parchment: '#fef3c7',
+              bounty: '#78350f',
+              red: '#ef4444',
+              blue: '#0ea5e9',
+            }
+          },
+          fontFamily: {
+            pirate: ['"Pirata One"', 'serif'],
+            bounty: ['"Rye"', 'serif'],
+            outfit: ['"Outfit"', 'sans-serif'],
+          },
+          backgroundImage: {
+            'parchment-tex': "url('https://www.transparenttextures.com/patterns/old-map.png')",
+            'ocean-bg': "linear-gradient(to bottom, #020617, #0f172a, #1e3a8a)",
+            'wanted-bg': "linear-gradient(to bottom, #fef3c7, #fde68a, #d97706)",
           }
-        },
-        fontFamily: {
-          pirate: ['"Pirata One"', 'serif'],
-          bounty: ['"Rye"', 'serif'],
-          outfit: ['"Outfit"', 'sans-serif'],
-        },
-        backgroundImage: {
-          'parchment-tex': "url('https://www.transparenttextures.com/patterns/old-map.png')",
-          'ocean-bg': "linear-gradient(to bottom, #020617, #0f172a, #1e3a8a)",
-          'wanted-bg': "linear-gradient(to bottom, #fef3c7, #fde68a, #d97706)",
         }
       }
     }
-  }
-</script>
-<style>
-  body { font-family: 'Outfit', sans-serif; background-color: #020617; color: #e2e8f0; overscroll-behavior: none; }
-  .wanted-poster {
-    background: #fef3c7 url('https://www.transparenttextures.com/patterns/old-map.png');
-    color: #451a03;
-    border: 4px solid #78350f;
-    box-shadow: 4px 4px 0px #451a03, inset 0 0 20px rgba(120,53,15,0.3);
-    border-radius: 4px;
-    position: relative;
-  }
-  .wanted-poster::before {
-    content: ''; position: absolute; inset: 0; background: radial-gradient(circle, transparent 60%, rgba(120,53,15,0.4)); pointer-events: none;
-  }
-  .treasure-map {
-    background: #fef3c7 url('https://www.transparenttextures.com/patterns/old-map.png');
-    color: #451a03;
-    border: 2px dashed #78350f;
-    border-radius: 12px;
-    box-shadow: inset 0 0 30px rgba(120,53,15,0.4);
-  }
-  .btn-gold {
-    background: linear-gradient(to bottom, #fbbf24, #d97706);
-    border: 2px solid #78350f;
-    color: #451a03;
-    box-shadow: 0 4px 0 #78350f;
-    transition: all 0.1s;
-    text-transform: uppercase;
-    font-weight: 900;
-  }
-  .btn-gold:active {
-    transform: translateY(4px);
-    box-shadow: 0 0 0 #78350f;
-  }
-  .glass-panel {
-    background: rgba(17, 24, 39, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(251, 191, 36, 0.2);
-  }
-  .text-shadow-gold { text-shadow: 0 0 10px rgba(251,191,36,0.6); }
-  /* Custom scrollbar */
-  ::-webkit-scrollbar { width: 0; }
-  
-  /* Utilities for hiding */
-  .tab-page { display: none; }
-  .tab-page.active { display: block; animation: fadeIn 0.3s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
-  #app { display: none; }
-  #app.show { display: flex; }
-  .auth-screen { display: none; }
-  .auth-screen.show { display: flex; }
-</style>
+  </script>
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #020617;
+      color: #e2e8f0;
+      overscroll-behavior: none;
+    }
+
+    .wanted-poster {
+      background: #fef3c7 url('https://www.transparenttextures.com/patterns/old-map.png');
+      color: #451a03;
+      border: 4px solid #78350f;
+      box-shadow: 4px 4px 0px #451a03, inset 0 0 20px rgba(120, 53, 15, 0.3);
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .wanted-poster::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, transparent 60%, rgba(120, 53, 15, 0.4));
+      pointer-events: none;
+    }
+
+    .treasure-map {
+      background: #fef3c7 url('https://www.transparenttextures.com/patterns/old-map.png');
+      color: #451a03;
+      border: 2px dashed #78350f;
+      border-radius: 12px;
+      box-shadow: inset 0 0 30px rgba(120, 53, 15, 0.4);
+    }
+
+    .btn-gold {
+      background: linear-gradient(to bottom, #fbbf24, #d97706);
+      border: 2px solid #78350f;
+      color: #451a03;
+      box-shadow: 0 4px 0 #78350f;
+      transition: all 0.1s;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .btn-gold:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #78350f;
+    }
+
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    .text-shadow-gold {
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 0;
+    }
+
+    /* Utilities for hiding */
+    .tab-page {
+      display: none;
+    }
+
+    .tab-page.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    #app {
+      display: none;
+    }
+
+    #app.show {
+      display: flex;
+    }
+
+    .auth-screen {
+      display: none;
+    }
+
+    .auth-screen.show {
+      display: flex;
+    }
+  </style>
 </head>
+
 <body>
 
   <!-- SPLASH -->
@@ -539,15 +593,18 @@
     <!-- EARN TAB -->
     <div class="tab-page" id="earnTab">
       <div style="padding: 30px 20px; text-align: center; max-width: 500px; margin: 0 auto;">
-        <div style="font-family: var(--font-pirate); font-size: 2.5rem; font-weight: 400; color: var(--gold); text-shadow: 0 0 10px rgba(245,166,35,0.4); margin-bottom: 10px;">
+        <div
+          style="font-family: var(--font-pirate); font-size: 2.5rem; font-weight: 400; color: var(--gold); text-shadow: 0 0 10px rgba(245,166,35,0.4); margin-bottom: 10px;">
           Treasure Trove
         </div>
         <div style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 20px;">
           Complete the premium tasks below to earn free coins! Use these coins to play and win real money.
         </div>
-        
-        <div id="offerwall-container" style="background: rgba(15, 24, 41, 0.6); border: 1px solid rgba(245, 166, 35, 0.2); border-radius: 16px; min-height: 400px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); overflow: hidden; position: relative;">
-          <div id="offerwall-loader" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.9rem; animation: pulse 1.5s infinite;">
+
+        <div id="offerwall-container"
+          style="background: rgba(15, 24, 41, 0.6); border: 1px solid rgba(245, 166, 35, 0.2); border-radius: 16px; min-height: 400px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); overflow: hidden; position: relative;">
+          <div id="offerwall-loader"
+            style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.9rem; animation: pulse 1.5s infinite;">
             <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--gold); margin-bottom: 15px;"></i>
             <span style="font-weight: 600; letter-spacing: 1px;">Loading premium offers...</span>
           </div>
@@ -6007,7 +6064,7 @@
         if (typeof loadOfferWall === 'function') loadOfferWall();
       }
       if (name === 'menu') loadProfile();
-      
+
       updateHeader(name);
     }
 
@@ -7124,27 +7181,49 @@
     function loadOfferWall() {
       const container = document.getElementById('offerwall-container');
       if (!container) return;
-      
-      // Clear any previous duplicated scripts keeping the structure
+
+      const currentUid = (typeof user !== 'undefined' && user && (user.ffUid || user.uid)) || 'guest';
+
+      // Container ko saaf karke loading text daalo
       container.innerHTML = `
         <div id="offerwall-loader" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.9rem;">
           <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--gold); margin-bottom: 15px;"></i>
-          <span style="font-weight: 600; letter-spacing: 1px;">Loading premium offers...</span>
+          <span style="font-weight: 600; letter-spacing: 1px;">Loading Premium Bounties...</span>
         </div>
       `;
-      
-      const currentUid = (typeof user !== 'undefined' && user && (user.ffUid || user.uid)) || 'guest';
-      const scriptUrl = `https://tundrafile.com/script_include.php?id=1888061&tracking_id=${currentUid}`;
-      
-      const scriptEl = document.createElement('script');
-      scriptEl.type = 'text/javascript';
-      scriptEl.src = scriptUrl;
-      scriptEl.onload = function() {
-        const loader = document.getElementById('offerwall-loader');
-        if (loader) loader.style.display = 'none';
-      };
-      
-      container.appendChild(scriptEl);
+
+      // Ek Virtual Iframe banayenge (Document.write Block bypass karne ke liye)
+      setTimeout(() => {
+        container.innerHTML = ''; // Loader hatao
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.minHeight = '600px';
+        iframe.style.border = 'none';
+        iframe.style.borderRadius = '16px';
+        container.appendChild(iframe);
+
+        // Iframe ke andar CPAGrip ka code daalenge
+        const iframeDoc = iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body, html { margin: 0; padding: 0; background-color: #0f1829; height: 100%; color: white; font-family: sans-serif;}
+              /* Hide scrollbar for seamless look */
+              ::-webkit-scrollbar { width: 0px; background: transparent; }
+            </style>
+          </head>
+          <body>
+            <script type="text/javascript">var cpagrip_tracking_id = "${currentUid}";<\/script>
+            <script type="text/javascript" src="https://tundrafile.com/script_include.php?id=1888061&tracking_id=${currentUid}"><\/script>
+          </body>
+          </html>
+        `);
+        iframeDoc.close();
+      }, 800); // Thoda smooth loading feel dene ke liye
     }
 
     function loadEarnPage() {
@@ -7277,12 +7356,12 @@
       if (dot && all.length) { dot.style.display = 'block'; }
       if (countBadge && all.length) { countBadge.style.display = 'inline-block'; countBadge.textContent = all.length > 99 ? '99+' : all.length; }
       const list = document.getElementById('notifList');
-      
+
       // Auto-refresh balance whenever there's a notification update (e.g., tournament win)
       if (typeof refreshUserBalance === 'function') {
         refreshUserBalance();
       }
-      
+
       if (!list) return;
       if (!all.length) {
         list.innerHTML = '<div style="padding:32px 20px;text-align:center"><div style="font-size:2rem;margin-bottom:8px">🔕</div><div style="font-size:0.78rem;color:var(--text-dim)">No notifications yet</div></div>';
@@ -7799,7 +7878,7 @@
             console.error("Verification Error:", err);
           });
       }
-    }); 
+    });
 
     // User's requested balance refresh mechanism
     async function refreshUserBalance() {
