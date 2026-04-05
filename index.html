@@ -7198,7 +7198,7 @@
         const iframe = document.createElement('iframe');
         iframe.style.width = '100%';
         iframe.style.height = '100%';
-        iframe.style.minHeight = '600px';
+        iframe.style.minHeight = '700px'; // Thodi height badha di hai
         iframe.style.border = 'none';
         iframe.style.borderRadius = '16px';
         container.appendChild(iframe);
@@ -7210,9 +7210,17 @@
           <!DOCTYPE html>
           <html>
           <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <style>
-              body, html { margin: 0; padding: 0; background-color: #0f1829; height: 100%; color: white; font-family: sans-serif;}
-              /* Hide scrollbar for seamless look */
+              body, html { 
+                margin: 0; 
+                padding: 0; 
+                background-color: #121629 !important; /* Aapki app ka background */
+                color: white !important; 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              }
+              /* CPAGrip ke tables ko zabardasti screen me fit karne ka hack */
+              table, div, .offer_item { width: 100% !important; box-sizing: border-box !important; }
               ::-webkit-scrollbar { width: 0px; background: transparent; }
             </style>
           </head>
@@ -7223,7 +7231,7 @@
           </html>
         `);
         iframeDoc.close();
-      }, 800); // Thoda smooth loading feel dene ke liye
+      }, 800);
     }
 
     function loadEarnPage() {
