@@ -7187,51 +7187,23 @@
       // Container ko saaf karke loading text daalo
       container.innerHTML = `
         <div id="offerwall-loader" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.9rem;">
-          <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--gold); margin-bottom: 15px;"></i>
-          <span style="font-weight: 600; letter-spacing: 1px;">Loading Premium Bounties...</span>
+          <i class="fas fa-gem fa-spin" style="font-size: 2.5rem; color: #a855f7; margin-bottom: 15px;"></i>
+          <span style="font-weight: 600; letter-spacing: 1px;">Loading AdGem Premium Bounties...</span>
         </div>
       `;
 
-      // Ek Virtual Iframe banayenge (Document.write Block bypass karne ke liye)
       setTimeout(() => {
         container.innerHTML = ''; // Loader hatao
         const iframe = document.createElement('iframe');
         iframe.style.width = '100%';
         iframe.style.height = '100%';
-        iframe.style.minHeight = '700px'; // Thodi height badha di hai
+        iframe.style.minHeight = '700px';
         iframe.style.border = 'none';
         iframe.style.borderRadius = '16px';
+        iframe.style.backgroundColor = '#121629';
+        iframe.src = `https://api.adgem.com/v1/wall?appid=32318&playerid=${currentUid}`;
+        
         container.appendChild(iframe);
-
-        // Iframe ke andar CPAGrip ka code daalenge
-        const iframeDoc = iframe.contentWindow.document;
-        iframeDoc.open();
-        iframeDoc.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-            <style>
-              body, html { 
-                margin: 0; 
-                padding: 0; 
-                background-color: #121629 !important; /* Aapki app ka background */
-                color: white !important; 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              }
-              /* CPAGrip ke tables ko zabardasti screen me fit karne ka hack */
-              table, div, .offer_item { width: 100% !important; box-sizing: border-box !important; }
-              .offer_title, .body_text { white-space: normal !important; min-width: 100% !important; }
-              ::-webkit-scrollbar { width: 0px; background: transparent; }
-            </style>
-          </head>
-          <body>
-            <script type="text/javascript">var cpagrip_tracking_id = "${currentUid}";<\/script>
-            <script type="text/javascript" src="https://verifyzone.net/script_include.php?id=1888061&tracking_id=${currentUid}"><\/script>
-          </body>
-          </html>
-        `);
-        iframeDoc.close();
       }, 800);
     }
 
